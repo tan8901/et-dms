@@ -1,0 +1,66 @@
+<body>
+    <form>
+        <input type="hidden" value="" id="hip">
+    </form>
+    <label>Choose Exam</label>
+                            <select name="exam" id='exam' class="form-control">
+                                <option value="">----</option>
+                                <option value="mid1">Mid-term 1</option>
+                                <option value="mid2">Mid-term 2</option>
+                            </select>
+<table id="student_results">
+    <thead>
+        <tr>
+            <td>Rollno</td>
+            <td>Mid1</td>
+            <td>assg1</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>20B81A3301</td>
+            <td><input class='form-control' name='mid1' placeholder='Mid 1 Marks' max='40' min='0' required type='number' value='35'/></td>
+            <td><input class='form-control' name='assg1' placeholder='Assignment 1 Marks' max='8' min='0' required type='number' value='8'/></td>
+        </tr>
+    </tbody>
+</table>
+<button onclick="submitResult()">Submit Result</button>
+<script>
+    function submitResult() {
+        res_table = document.getElementById('student_results')
+        tr = res_table.getElementsByTagName("tr");
+        var exam = document.getElementById("exam").value
+        student_json = []
+        console.log(exam)
+        if (exam == 'mid1') {
+            for (i=1; i<tr.length; i++) {
+                row = tr[i].getElementsByTagName("td");
+                sj ={
+                    'rollno':row[0].innerText,
+                    'mid1':row[1].querySelector('input').value,
+                    'assg1':row[2].querySelector('input').value
+                }
+                student_json.push(sj);
+            }
+        } else {
+            for (i=1; i<tr.length; i++) {
+                row = tr[i].getElementsByTagName("td");
+                sj = {
+                    'rollno':row[0].innerText,
+                    'mid2':row[1].innerHTML.value,
+                    'assg2':row[2].innerHTML.value
+                }
+                student_json.push(sj);
+            }
+        }
+        
+        console.log(student_json)
+        document.getElementById('hip').value=JSON.stringify([{'id':'abc'},{'id':'def'}])
+        console.log(document.getElementById('hip').value)
+
+
+        //document.getElementById('sturesform').submit();
+
+    }
+</script>
+</body>
