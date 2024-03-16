@@ -1,0 +1,22 @@
+INFORMATION ABOUT PROJECT:
+--------------------------
+name: ET-DMS (Emerging Technologies Department Management System)
+developer: Tanuja
+reference: College Management System Project
+last modified date: 16th March 2024
+
+
+IMPORTANT COMMANDS:
+-------------------
+
+to create admin: 		                python manage.py createsuperuser
+
+to create migration files:	            	python manage.py makemigrations
+
+to apply migration to DB:	            	python manage.py migrate
+
+to run server:			                python manage.py runserver
+
+add write-excel-file dependency:		npm install write-excel-file --save
+
+
