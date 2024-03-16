@@ -6,6 +6,16 @@ If students want to view their past results, or view their attendance, there is 
 
 Therefore, I propose a Department Management System which includes three interfaces for each type of users, they are HOD, Staff, and Student. Students can view their Attendance and Midterm Marks. Staff can add Student Attendance, Midterm marks and Assignment marks, download report of Students Marks and Attendance and apply for Leave. HOD can view and download Student Attendance and Mid-term results based on class, and also approve faculty leave. The system will automatically downscale the Mid-term marks.
 
+```Technologies Used```
+
+- django (python)
+- html, css, javascript
+- sqlite
+- SheetJS
+- pdfMake
+- jQuery
+- ajax
+- bootstrap
 
 ```Features```
 1. automatic downscaling of midterm marks
