@@ -1,0 +1,73 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <!-- Small boxes (Stat box) -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{total_attendance}}</h3>
+
+                        <p>Total Number of Classes</p>
+                    </div>
+                    <div class="icon">
+                      <i class="nav-icon fas fa-calendar-alt"></i>
+                    </div>
+                    {# <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> #}
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>{{ percent_present }}<sup style="font-size: 20px">%</sup></h3>
+
+                        <p>Percentage Present</p>
+                    </div>
+                    <div class="icon">
+                      <i class="nav-icon fas fa-calendar-check"></i>
+                    </div>
+                    {# <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> #}
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>{{classes_absent}}</h3>
+
+                        <p>Classes Missed</p>
+                    </div>
+                    <div class="icon">
+                      <i class="nav-icon fas fa-calendar-minus"></i>
+                    </div>
+                    {# <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> #}
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-primary">
+                    <div class="inner">
+                        <h3>{{total_subject}}</h3>
+
+                        <p>Total Subjects</p>
+                    </div>
+                    <div class="icon">
+                      <i class="nav-icon fas fa-book"></i>
+                    </div>
+                    {# <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> #}
+                </div>
+            </div>
+            <!-- ./col -->
+        </div>
+
+      </div>  
+  </section>
+{% endblock content %}

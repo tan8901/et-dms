@@ -1,0 +1,135 @@
+
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+                    <form method="POST" id="sturesform">
+                        {% csrf_token %}
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">{{page_title}}</h3>
+                    </div>
+                    
+       
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <div class="card-body">
+
+                        <div class="form-group">
+                            <label>Subject</label>
+                            <select name="subject" class="form-control" id='subject'>
+                                <option value="">----</option>
+                                {% for subject in subjects  %}
+                                <option value="{{subject.id}}">{{subject.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Choose Exam</label>
+                            <select name="exam" id='exam' class="form-control">
+                                <option value="">----</option>
+                                <option value="mid1">Mid-term 1</option>
+                                <option value="mid2">Mid-term 2</option>
+                            </select>
+                        </div>
+                        
+                    </div>
+                    <!-- /.card-body -->
+                    <div class="card-footer">
+                        <button type="button" id='fetch_student' class="btn btn-primary btn-block">Fetch Students</button>
+                        <input type="hidden" id="hiddeninput" name="hiddeninput" value="">
+                        <input type="hidden" id="sturecords" name="sturecords" value="">
+                        <div class="form-group" id="student_data">
+                            
+
+                        </div>
+                        
+                    </div>
+                    
+                </form>
+                </div>
+                <!-- /.card -->
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block custom_js %}
+<script>
+    
+    $(document).ready(function () {
+       
+        $("#fetch_student").click(function () {
+            var subject = $("#subject").val()
+            var exam = $("#exam").val()
+            $("#student_data").html(null)
+            if (subject.length  == 0){
+                alert("Please select subject");
+                return false;
+            }
+                        $.ajax({
+                            url: "{% url 'get_students' %}",
+                            type: 'POST',
+                            data: {
+                                subject: subject,
+                            }
+                        }).done(function (response) {
+                            var json_data = JSON.parse(response)
+                            var inputElement = document.querySelector('input[name="hiddeninput"]');
+                            if (json_data.length < 1) {
+                                alert("No Students in this Class")
+                            } else if(exam=="mid1") {
+                                i=1
+                                var div_data = "<hr/><table class='table table-bordered' name='student_results' id='student_results'><thead class='table-dark'><tr><td>Roll Number</td><td>Mid 1</td><td>Assignment 1</td></tr></thead><tbody>"
+                                sturecords = []
+                                for (key in json_data) {
+                                    sturecords.push({'rollno':json_data[key]['rollno']})
+                                    div_data += "<tr><td>"+json_data[key]['rollno']+"</td><td><input class='form-control' name='mid-"+i+"' placeholder='Maximum 40' max='40' min='0' required type='number' value=''/></td><td><input class='form-control' name='assg-"+i+"' placeholder='Maximum 8' max='8' min='0' required type='number' value=''/></td><td></tr>"
+                                    i+=1
+                                }
+                                document.querySelector('input[name="hiddeninput"]').value = i-1;
+                                document.querySelector('input[name="sturecords"]').value=JSON.stringify(sturecords);
+
+                                div_data += "</tbody></table><button type='submit' id='save_result' class='btn btn-success'>Save Results</button>"
+                                
+                                $("#student_data").html(div_data)
+                                
+                            } else {
+                                i=1
+                                var div_data = "<hr/> <table class='table table-bordered table-hover' name='student_results' id='student_results'><thead class='table-dark'><tr><td>Roll Number</td><td>Mid 2</td><td>Assignment 2</td></tr></thead><tbody>"
+                                sturecords = []
+                                for (key in json_data) {
+                                    sturecords.push({'rollno':json_data[key]['rollno']})
+                                    div_data +="<tr><td>"+json_data[key]['rollno']+"</td><td><input class='form-control' name='mid-"+i+"' placeholder='Maximum 40' max='40' min='0' required type='number' /></td><td><input class='form-control' name='assg-"+i+"' placeholder='Maximum 8' max='8' min='0' required type='number' /></td></tr>"
+                                    i+=1
+                                }
+
+                                document.querySelector('input[name="hiddeninput"]').value = i-1;
+                                document.querySelector('input[name="sturecords"]').value=JSON.stringify(sturecords);
+
+                                div_data += "</tbody></table><button id='save_result' class='btn btn-success' onclick='submitResult()' >Save Results</button>"
+                                
+                                
+
+                                $("#student_data").html(div_data)
+                                
+                            }
+                        }).fail(function (response) {
+                            alert("Error in fetching students")
+                        })
+
+                        
+
+        })
+    })
+
+    
+</script>
+{% endblock custom_js %}

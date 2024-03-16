@@ -1,0 +1,67 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+                {% if leaves_left <= 0 %}
+                    <div class="card-body">
+                        <div class="alert alert-danger" role="alert">
+                            You do not have any Casual Leaves Left
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">{{page_title}}</h3>
+                    </div>
+                    <form name="staff_apply_leave" action="{% url 'staff_apply_leave' %}" method="POST" role="form" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <div class="form-row">
+                                <input type="hidden" id="leaves_left" value="{{leaves_left}}">
+                                <div class="col-md-5">
+                                    <label>From</label>
+                                    <input type="date" class="form-control" name="from_date" id="from_date" min="{{current_date}}">
+                                </div>
+                                <div class="col-md-5">
+                                    <label>To</label>
+                                    <input type="date" class="form-control" name="to_date" id="to_date" min="{{current_date}}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Days</label>
+                                    <input type="number" class="form-control" name="days" id="days" onchange="leaveAlert()">
+                                </div>
+                            </div>
+                            <br>
+                            <div class="form-row">
+                                <label>Message</label>
+                                <textarea class="form-control" rows="5" name="message"></textarea>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-success btn-block">Apply Leave</button>
+                        </div>
+                    </form>
+
+                </div>
+                <!-- /.card -->
+        </div>
+    </div>
+    <script>
+        function leaveAlert() {
+            days = document.getElementById("days").value
+            leaves_left = document.getElementById("leaves_left").value
+            if (leaves_left<=days) {
+                alert("You are applying for more leaves than you have CL's.")
+                
+            }
+        }
+    </script>
+</section>
+{% endblock content %}

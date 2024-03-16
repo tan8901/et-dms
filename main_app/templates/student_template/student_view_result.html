@@ -1,0 +1,41 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+       
+                <!-- /.card -->
+<div class="card card-dark">
+    <div class="card-header"><h3 class="card-title">Results</h3>
+    </div>
+   <div class="table p-2">
+
+       <table class="table table-bordered">
+           <tr>
+               <th>Subject</th>
+               <th>Mid 1 Total</th>
+               <th>Mid 2 Total</th>
+               <th>Internal</th>
+        </tr>
+        {% for result in results %}
+        <tr>
+            <td>{{ result.subject }}</td>
+            <td>{{ result.mid1total }}</td>
+            <td>{{ result.mid2total }}</td>
+            <td>{{ result.internal }}</td>
+        </tr>
+        {% endfor %}
+        </table>
+    </div>
+    </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

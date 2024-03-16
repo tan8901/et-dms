@@ -1,0 +1,178 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+<script src="{% static 'printreport.js' %}"></script>
+<!--CDN to convert HTML table to excel-->
+<script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+<!--CDN to convert HTML table to PDF || source: pdfmake-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    
+                    <div class="card-header form-inline">
+                        <select id="mySub" onchange="myFunction()" class="form-control form-select">
+                            <option value="">-- Select Subject --</option>
+                            {% for s in subjects %}
+                                <option value="{{s.name}}">{{s.name}}</option>
+                            {% endfor %}
+                        </select>
+                        
+                    </div>
+                    <!-- /.card-header -->
+                    
+                    <div class="card-body">
+                        <div style="display:none" id="staffname">{{request.user}}</div>
+                        <table id="reporttable" class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Roll No</th>
+                                    <th>Full Name</th>
+                                    <th name="mid1">Mid 1</th>
+                                    <th name="mid1">Assignment 1</th>
+                                    <th name="mid2">Mid 2</th>
+                                    <th name="mid2">Assignment 2</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sub in subjects %}
+                                {% for res in results %}
+                                {% if res.subject == sub %}
+                                    <tr>
+                                        <td>{{res.subject}}</td>
+                                        <td>{{res.student.rollno}}</td>
+                                        <td>{{res.student.admin.last_name}} {{res.student.admin.first_name}}</td>
+                                        <td name="mid1">{{res.mid1}}</td>
+                                        <td name="mid1">{{res.assg1}}</td>
+                                        <td name="mid2">{{res.mid2}}</td>
+                                        <td name="mid2">{{res.assg2}}</td>
+                                    </tr>
+                                {% endif %}
+                                {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table><br/>
+                        <button class="btn btn-success" onclick="get_excel('xlsx','reporttable')">Download Spreadsheet</button>
+                        <button class="btn btn-info" onclick="get_pdf('reporttable')">Generate Report</button>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    <script>
+        
+        function get_excel(type,name,fn,dl)
+        {
+            var elt = document.getElementById(name);
+            var wb = XLSX.utils.table_to_book(elt, { sheet: "sheet1" });
+            return dl ?
+                XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
+                XLSX.writeFile(wb, fn || ('Attendance_Report.' + (type || 'xlsx')));
+        }
+
+        function get_pdf(name) {
+            //extracting the table data
+            const filteredData = [];
+            const tableRows = document.getElementById('reporttable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            for (const row of tableRows) {
+                if (row.style.display !== 'none') {
+                    const rowData = [];
+                    for (const cell of row.cells) {
+                        rowData.push(cell.innerText);
+                    }
+                    filteredData.push(rowData);
+                }
+            }
+            
+            //details to add in report
+            const staffname = document.getElementById('staffname').innerText;
+            const currentDate = new Date().toLocaleDateString();
+            
+            //generating the pdf
+            const docDefinition = {
+              header: {text:'College Name\nDepartment of ET',alignment:'center',style:'header'},
+              footer: function(currentPage,pageCount) { return ({text: `Page ${currentPage} of ${pageCount}`,alignment:'center',style:'footer'});},
+              content: [
+               
+                {text: 'Marks Report', style:'heading',alignment:'center'},
+                {columns: [
+                        {text:`Staff Name: ${staffname}`,width:'*'},
+                        {text: `Date: ${currentDate}`,width:'*',alignment:'right'}
+                    ],
+                    margin: [0,0,0,10]
+                },
+
+                { 
+                  table: {
+                    widths:['*','*','*',50,50,50,50],
+                    headerRows: 1,
+                    body: [
+                      ['Subject','Roll No','Student Name','Mid 1','A-1','Mid 2','A-2'],
+                      ...filteredData.map(Object.values)
+                    ]
+                  },
+                  layout: {
+                    fillColor: function(rowIndex) {
+                      if (rowIndex === 0) {
+                        return '#e3e3e3';
+                      }
+                    }
+                  }
+  
+                }
+              ],
+              styles: {
+                heading: {
+                    fontSize: 18,
+                    bold: true,
+                    margin: [0, 0, 0, 10],
+                },
+                header: {
+                  fontSize: 10,
+                  color: '#888888',
+                  margin: [0,5,0,0]
+                },
+                footer: {
+                  fontSize:10,
+                  color: '#888888'
+                },
+                
+  
+            }
+            };
+            pdfMake.createPdf(docDefinition).open();
+          }
+ 
+
+        function myFunction() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("mySub");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("reporttable");
+            tr = table.getElementsByTagName("tr");
+            for (i = 0; i < tr.length; i++) {
+              td = tr[i].getElementsByTagName("td")[0];
+              if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                  tr[i].style.display = "";
+                } else {
+                  tr[i].style.display = "none";
+                }
+              }       
+            }
+          }
+          
+    </script>
+</section>
+
+
+{% endblock content %}

@@ -1,0 +1,175 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+<script src="{% static 'printreport.js' %}"></script>
+<!--CDN to convert HTML table to excel-->
+<script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+<!--CDN to convert HTML table to PDF || source: pdfmake-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    
+                    <div class="card-header">
+                        <div class="form-inline">
+                            <select id="myBranch" onchange="myFunction('myBranch',0)" class="form-control form-select">
+                                <option value="">-- Select Branch --</option>
+                                {% for b in branches %}
+                                    <option value="{{b.name}}">{{b.name}}</option>
+                                {% endfor %}
+                              </select>
+                            <div style="padding:10px"></div>
+                            <select id="mySub" onchange="myFunction('mySub',3)" class="form-control form-select">
+                                <option value="">-- Select Subject --</option>
+                                {% for s in subjects %}
+                                    <option value="{{s.name}}">{{s.name}} -- {{s.branch.name}}</option>
+                                {% endfor %}
+                            </select>
+                            <div style="padding:10px"></div>
+                            <input id="myRno" type="text" placeholder="Enter Roll Number..." onkeyup="myFunction('myRno',1)" class="form-control" title="Enter a Roll Number">
+                        </div>
+                        
+                    </div>
+                    <!-- /.card-header -->
+                    
+                    <div class="card-body">
+                        <table id="reporttable" class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Branch</th>
+                                    <th>Roll No</th>
+                                    <th>Full Name</th>
+                                    <th>Subject</th>
+                                    <th>Mid 1 Total</th>
+                                    <th>Mid 2 Total</th>
+                                    <th>Internal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for res in results %}
+                                
+                                    <tr>
+                                        <td>{{res.student.branch}}</td>
+                                        <td>{{res.student.rollno}}</td>
+                                        <td>{{res.student.admin.last_name}} {{res.student.admin.first_name}}</td>
+                                        <td>{{res.subject}}</td>
+                                        <td>{{res.mid1total}}</td>
+                                        <td>{{res.mid2total}}</td>
+                                        <td>{{res.internal}}</td>
+                                        
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table><br/>
+                        <button class="btn btn-success" onclick="get_excel('xlsx','reporttable')">Download Spreadsheet</button>
+                        <button class="btn btn-info" onclick="get_pdf('reporttable')">Generate Report</button>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    <script>
+        function get_excel(type,name,fn,dl)
+        {
+            var elt = document.getElementById(name);
+            var wb = XLSX.utils.table_to_book(elt, { sheet: "sheet1" });
+            return dl ?
+                XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
+                XLSX.writeFile(wb, fn || ('Results_Report.' + (type || 'xlsx')));
+        }
+
+        function get_pdf(name) {
+            //extracting the table data
+            const filteredData = [];
+            const tableRows = document.getElementById('reporttable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            for (const row of tableRows) {
+                if (row.style.display !== 'none') {
+                    const rowData = [];
+                    for (const cell of row.cells) {
+                        rowData.push(cell.innerText);
+                    }
+                    filteredData.push(rowData);
+                }
+            }
+            const currentDate = new Date().toLocaleDateString();
+            
+            //generating the pdf
+            const docDefinition = {
+              header: {text:'College Name\nDepartment of ET',alignment:'center',style:'header'},
+              footer: function(currentPage,pageCount) { return ({text: `Page ${currentPage} of ${pageCount}`,alignment:'center',style:'footer'});},
+              content: [
+               
+                {text: 'Results Report', style:'heading',alignment:'center'},
+                {text: `Date: ${currentDate}`,alignment:'center'},
+                { 
+                  table: {
+                    widths:['*','*','*','*',50,50,'*'],
+                    headerRows: 1,
+                    body: [
+                      ['Branch','Roll Number',' Name','Subject','Mid 1','Mid 2','Internal'],
+                      ...filteredData.map(Object.values)
+                    ]
+                  },
+                  layout: {
+                    fillColor: function(rowIndex) {
+                      if (rowIndex === 0) {
+                        return '#e3e3e3';
+                        }
+                    }
+                  },
+  
+                }
+              ],
+              styles: {
+                heading: {
+                    fontSize: 18,
+                    bold: true,
+                    margin: [0, 0, 0, 10],
+                },
+                header: {
+                  fontSize: 10,
+                  color: '#888888',
+                  margin: [0,5,0,0]
+                },
+                footer: {
+                  fontSize:10,
+                  color: '#888888'
+                },
+            }
+            };
+            pdfMake.createPdf(docDefinition).open();
+        }
+
+        function myFunction(ip,num) {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById(ip);
+            filter = input.value.toUpperCase();
+            table = document.getElementById("reporttable");
+            tr = table.getElementsByTagName("tr");
+            for (i = 0; i < tr.length; i++) {
+              td = tr[i].getElementsByTagName("td")[num];
+              if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                  tr[i].style.display = "";
+                } else {
+                  tr[i].style.display = "none";
+                }
+              }       
+            }
+          }
+
+                    
+          
+    </script>
+</section>
+
+
+{% endblock content %}

@@ -1,0 +1,72 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <input id="myRno" type="text" placeholder="Enter Roll Number..." onkeyup="myFunction2()" class="form-control" title="Enter a Roll Number">
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Roll No</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Gender</th>
+                                    <th>Branch</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td>{{ student.student.rollno }}</td>
+                                    <td>{{student.last_name}} {{student.first_name}}</td>
+                                    <td>{{student.email}}</td>
+                                    <td>{{student.gender}}</td>
+                                    <td>{{student.student.branch.name}}</td>
+                                    
+                                    <td><a href="{% url 'edit_student' student.student.id %}" class="btn btn-info">Edit</a> -
+                                        <a href="{% url 'delete_student' student.student.id %}" class="btn btn-danger" onclick="return confirm('Are you sure about this ?')">Delete</a>
+
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function myFunction2() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("myRno");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("example2");
+            tr = table.getElementsByTagName("tr");
+            for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[0];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+                } else {
+                tr[i].style.display = "none";
+                }
+            }       
+            }
+        }
+    </script>
+</section>
+{% endblock content %}

@@ -1,0 +1,94 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <!-- Small boxes (Stat box) -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{total_students}}</h3>
+
+                        <p>Total Students</p>
+                    </div>
+                    <div class="icon">
+                      <i class="nav-icon fas fa-user-graduate"></i>
+                    </div>
+                    <a href="{% url 'manage_student' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-pink">
+                    <div class="inner">
+                        <h3>{{total_staff}}</h3>
+
+                        <p>Total Staff</p>
+                    </div>
+                    <div class="icon">
+                      <i class="nav-icon fas fa-users"></i>
+                    </div>
+                    <a href="{% url 'manage_staff' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-purple">
+                    <div class="inner">
+                        <h3>{{total_branch}}</h3>
+
+                        <p>Total Branches</p>
+                    </div>
+                    <div class="icon">
+                      <i class="nav-icon fas fa-th-list"></i>
+                    </div>
+                    <a href="{% url 'manage_branch' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>{{total_subject}}</h3>
+
+                        <p>Total Subjects</p>
+                    </div>
+                    <div class="icon">
+                      <i class="nav-icon fas fa-book"></i>
+                    </div>
+                    <a href="{% url 'manage_subject' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+        </div>
+        <div class="card card-default">
+            <div class="card-header">
+                <h3 class="card-title"><b>Staff Leaves</b></h3><br/>
+            </div>
+            <div class="card-body">
+                {% if leaves > 0 %}
+                <div class="alert alert-primary" role="alert">
+                    <div style="display:flex;">
+                        There are {{leaves}} Staff Leaves that need to be reviewed
+                        <a href="{% url 'view_staff_leave' %}" style="margin-left:auto">Take Action <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                
+                {% else %}
+                <div class="alert alert-success" role="alert">
+                    All Staff Leaves have been reviewed!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div><!-- /.container-fluid -->
+</section>
+{% endblock content %}

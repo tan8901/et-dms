@@ -1,0 +1,144 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+<script src="{% static 'printreport.js' %}"></script>
+<!--CDN to convert HTML table to excel-->
+<script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+<!--CDN to convert HTML table to PDF || source: pdfmake-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{{page_title}} -- {{subjects}}</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <div style="display:none" id="staffname">{{request.user}}</div>
+                        <div style="display:none" id="subject">{{subjects}}</div>
+                        <table id="reporttable" class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Roll No</th>
+                                    <th>Full Name</th>
+                                    <th>Attendance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for att in attendances %}
+                                    {% if att.student in students %}
+                                    <tr>
+                                        <td>{{att.student.rollno}}</td>
+                                        <td>{{att.student.admin.last_name}} {{att.student.admin.first_name}}</td>
+                                        <td>{{att.present_percentage}}</td>
+
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <br/>
+                        <button class="btn btn-success" onclick="get_excel('xlsx')">Download Spreadsheet</button>
+                        <button class="btn btn-info" onclick="get_pdf('reporttable')">Generate Report</button>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        
+        function get_excel(type,fn,dl)
+        {
+            var elt = document.getElementById('reporttable');
+            var wb = XLSX.utils.table_to_book(elt, { sheet: "sheet1" });
+            return dl ?
+                XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
+                XLSX.writeFile(wb, fn || ('Attendance_Report.' + (type || 'xlsx')));  
+        }
+
+        
+        function get_pdf(name) {
+            //extracting the table data
+            const filteredData = [];
+            const tableRows = document.getElementById('reporttable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            for (const row of tableRows) {
+                if (row.style.display !== 'none') {
+                    const rowData = [];
+                    for (const cell of row.cells) {
+                        rowData.push(cell.innerText);
+                    }
+                    filteredData.push(rowData);
+                }
+            }
+            
+            //details to add in report
+            const staffname = document.getElementById('staffname').innerText;
+            const subject = document.getElementById('subject').innerText.toString().slice(10);
+            const currentDate = new Date().toLocaleDateString();
+            
+            //generating the pdf
+            const docDefinition = {
+              header: {text:'College Name\nDepartment of ET',alignment:'center',style:'header'},
+              footer: function(currentPage,pageCount) { return ({text: `Page ${currentPage} of ${pageCount}`,alignment:'center',style:'footer'});},
+              content: [
+               
+                {text: 'Attendance Report', style:'heading',alignment:'center'},
+                {columns: [
+                        {text:`Staff Name: ${staffname}`,width:'*'},
+                        {text: `Date: ${currentDate}`,width:'*',alignment:'right'}
+                    ]
+                },
+                {text: `Class: ${subject}`,margin:[0,0,0,10]}
+                ,
+                { 
+                  table: {
+                    widths:['*','*','*'],
+                    headerRows: 1,
+                    body: [
+                      ['Roll Number','Student Name','Attendance %'],
+                      ...filteredData.map(Object.values)
+                    ]
+                  },
+                  layout: {
+                    fillColor: function(rowIndex) {
+                      if (rowIndex === 0) {
+                        return '#e3e3e3';
+                      }
+                    }
+                  },
+  
+                }
+              ],
+              styles: {
+                heading: {
+                    fontSize: 18,
+                    bold: true,
+                    margin: [0, 0, 0, 10],
+                },
+                header: {
+                  fontSize: 10,
+                  color: '#888888',
+                  margin: [0,5,0,0]
+                },
+                footer: {
+                  fontSize:10,
+                  color: '#888888'
+                },
+                
+  
+            }
+            };
+            pdfMake.createPdf(docDefinition).open();
+          }
+          
+
+    </script>
+</section>
+{% endblock content %}
